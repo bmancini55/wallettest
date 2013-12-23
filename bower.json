@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "wallettest",
   "version": "0.0.1",
   "dependencies": {
-    "bitcoinjs-lib": "../bitcoinjs-lib/bitcoinjs-lib.git"
+    "bitcoinjs-lib": "https://github.com/bmancini55/bitcoinjs-lib.git"
   }
 }
