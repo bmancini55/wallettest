@@ -46,6 +46,15 @@ getBitcoinClient = function(cb) {
   });
 }
 
+app.get('/bitcoin/info', function(req, res) {
+  getBitcoinClient(function(err, client) {
+    client.getInfo(function(err, result) {
+      if(err) res.send(err);
+      else res.send(result);
+    });
+  });
+});
+
 app.get('/bitcoin/accounts', function(req, res) {
   getBitcoinClient(function(err, client) {
     client.listAccounts(function(err, result) {
@@ -64,6 +73,38 @@ app.get('/bitcoin/transactions', function(req, res) {
     });
   });
 });
+
+
+
+
+// LITECOIN SHIZZY
+getLitecoinClient = function(cb) {
+  var litecoin = require('node-litecoin')
+    , litecoinConfig = CONFIG.clients.litecoind
+    , client;
+
+  client = new litecoin.Client({
+    host: litecoinConfig.host,
+    port: litecoinConfig.port,
+    user: litecoinConfig.user,
+    pass: litecoinConfig.pass
+  });
+
+  process.nextTick(function() {
+    cb(null, client);
+  });
+}
+
+app.get('/litecoin/info', function(req, res) {
+  getLitecoinClient(function(err, client) {
+    client.getInfo(function(err, info) {
+      if(err) res.send(err);
+      else res.send(info);
+    });
+  });
+});
+
+
 
 console.log('listening on ' + CONFIG.server.port);
 app.listen(CONFIG.server.port);
