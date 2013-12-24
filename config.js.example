@@ -1,0 +1,38 @@
+// FistWallet configuration
+
+var config;
+
+config = {
+
+  development: {
+
+    // Express configurations
+    server: {
+      port: 8080
+    },
+
+    // Configure daemon clients
+    clients: {
+    
+      // Configure bitcoind client
+      bitcoind: {
+        host: "127.0.0.1",
+        post: 8332,
+        user: "someuser",
+        pass: "somepassword"
+      },
+
+      // Configure litecoind client
+      litecoind: {
+        host: "127.0.0.1",
+        port: "9332",
+        user: "someuser",
+        pass: "somepassword"
+      }
+
+    }
+  }  
+
+}
+
+module.exports = config;
