@@ -17,7 +17,7 @@ config = {
       // Configure bitcoind client
       bitcoind: {
         host: "127.0.0.1",
-        post: 8332,
+        port: 8332,
         user: "someuser",
         pass: "somepassword"
       },
@@ -25,7 +25,7 @@ config = {
       // Configure litecoind client
       litecoind: {
         host: "127.0.0.1",
-        port: "9332",
+        port: 9332,
         user: "someuser",
         pass: "somepassword"
       }

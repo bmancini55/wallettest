@@ -31,14 +31,14 @@ app.get('/', function(req, res) {
 // BITCOIN SHIZZY
 getBitcoinClient = function(cb) {
   var bitcoin = require('bitcoin')
-    , clientConfig = CONFIG.clients.bitcoind
+    , bitcoinConfig = CONFIG.clients.bitcoind
     , client;    
 
   client = new bitcoin.Client({
-    host: clientConfig.host,
-    port: clientConfig.port,
-    user: clientConfig.user,
-    pass: clientConfig.pass
+    host: bitcoinConfig.host,
+    port: bitcoinConfig.port,
+    user: bitcoinConfig.user,
+    pass: bitcoinConfig.pass
   });
 
   process.nextTick(function() {
