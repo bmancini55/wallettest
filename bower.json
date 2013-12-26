@@ -2,6 +2,7 @@
   "name": "wallettest",
   "version": "0.0.1",
   "dependencies": {
-    "bitcoinjs-lib": "https://github.com/bmancini55/bitcoinjs-lib.git"
+    "bitcoinjs-lib": "https://github.com/bmancini55/bitcoinjs-lib.git",
+    "jquery": "~2.0.3"
   }
 }
