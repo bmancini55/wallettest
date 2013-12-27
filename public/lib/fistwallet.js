@@ -2,11 +2,68 @@
 
 window.FistWallet = window.FistWallet || {};
 
+(function() {
+
+  function Base58Check() { }
+
+  Base58Check.encode = function(version, payloadBytes) {
+    var bytes
+      , checksum;
+
+    // copy payload bytes
+    var bytes = payloadBytes.slice(0);
+
+    // prepend version
+    bytes.unshift(version);
+
+    // append first 4-bytes of checksum
+    checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
+    bytes = bytes.concat(checksum.slice(0, 4));
+
+    // base58 encode 
+    return Bitcoin.Base58.encode(bytes);
+
+  }
+
+  Base58Check.decode = function(encoded) {
+     var bytes    
+      , version
+      , checksumBytes
+      , checksum;
+
+    // decode from base 58
+    bytes = Bitcoin.Base58.decode(encoded);
+
+    // verify checksum of last 4 bytes
+    checksumBytes = bytes.slice(bytes.length - 4);
+    bytes = bytes.slice(0, bytes.length - 4);
+    checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
+
+    if  (checksumBytes[0] != checksum[0] ||
+         checksumBytes[1] != checksum[1] ||
+         checksumBytes[2] != checksum[2] ||
+         checksumBytes[3] != checksum[3]) 
+      throw "Checksum validation failed";
+
+    // get version
+    version = bytes.shift(0);
+
+    // return version and bytes
+    return {
+      version: version,
+      payloadBytes: bytes
+    };
+  }
+
+  Bitcoin.Base58Check = Base58Check;
+
+}());
+
+
+
 
 (function() {
   'use strict';
-
-
 
 
   function Wallet() { 
@@ -90,7 +147,7 @@ window.FistWallet = window.FistWallet || {};
 
     // creates an address from a key
     else if(data && data instanceof FistWallet.ECKey) {
-      createFromECKey.call(this);
+      createFromECKey.call(this, data);
     }
   }
 
@@ -100,7 +157,7 @@ window.FistWallet = window.FistWallet || {};
   //
   
   /**
-   * Encodes the Address in the standard format:
+   * Encodes the Address in the standard format (Base58Check):
    * 
    * Version = 1 byte of 0 (zero); on the test network, this is 1 byte of 111
    * Key hash = Version concatenated with RIPEMD-160(SHA-256(public key))
@@ -110,26 +167,11 @@ window.FistWallet = window.FistWallet || {};
    * https://en.bitcoin.it/wiki/Protocol_specification#Addresses
    */
   Address.prototype.encode = function() {
-      
-    var bytes
-      , checksum;
-
-    // copy publicKeyHashBytes
-    var bytes = this.publicKeyHashBytes.slice(0);
-
-    // prepend version
-    bytes.unshift(this.version);
-
-    // append first 4-bytes of checksum
-    checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
-    bytes = bytes.concat(checksum.slice(0, 4));
-
-    // base58 encode 
-    return Bitcoin.Base58.encode(bytes);
+    return Bitcoin.Base58Check.encode(this.version, this.publicKeyHashBytes);
   }
 
   /**
-   * Decodes from the standard format:
+   * Decodes from the standard format (Base58Check):
    *
    * Version = 1 byte of 0 (zero); on the test network, this is 1 byte of 111
    * Key hash = Version concatenated with RIPEMD-160(SHA-256(public key))
@@ -139,34 +181,7 @@ window.FistWallet = window.FistWallet || {};
    * https://en.bitcoin.it/wiki/Protocol_specification#Addresses
    */
   Address.prototype.decode = function(encoded) {
-    
-    var bytes    
-      , version
-      , checksumBytes
-      , checksum;
-
-    // decode from base 58
-    bytes = Bitcoin.Base58.decode(encoded);
-
-    // verify checksum
-    checksumBytes = bytes.slice(21);
-    bytes = bytes.slice(0,21);
-    checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
-
-    if  (checksumBytes[0] != checksum[0] ||
-         checksumBytes[1] != checksum[1] ||
-         checksumBytes[2] != checksum[2] ||
-         checksumBytes[3] != checksum[3]) 
-      throw "Checksum validation failed";
-
-    // get version
-    version = bytes.shift(0);
-
-    // return version and bytes
-    return {
-      version: version,
-      publicKeyHashBytes: bytes
-    };
+    return Bitcoin.Base58Check.decode(encoded);
   }
 
 
@@ -210,9 +225,16 @@ window.FistWallet = window.FistWallet || {};
    */
   var ECKey = function(input) {
     
+    // create a new key if no input
     if(!input) {
       createNew.call(this);
-    }
+
+    } 
+
+    // import using wallet import format
+    else if(typeof(input) === "string" && input.length === 51 && input[0] === "5") {
+      createFromWIF.call(this, input);
+    }    
     
   }
 
@@ -235,16 +257,56 @@ window.FistWallet = window.FistWallet || {};
   }
 
 
+  /**
+   * Private key represented by a BigNumber 
+   */
+  ECKey.prototype.priv = null;
+
+  /**
+   * Output the key compressed format
+   */
+  ECKey.prototype.compressed = false;
+
+
 
 
   // PRIVATE FUNCTIONS
   //
 
+  /**
+   * @private
+   * Creates a new ECKey
+   */
   var createNew = function() {
     var n = ecparams.getN();
     this.priv = ECDSA.getBigRandom(n);
     this.compressed = false;
   }
+
+  /**
+   * @private 
+   * creates an ECKey from WIF format
+   */
+  var createFromWIF = function(data) {
+    var decodeResult
+      , priv;
+    
+    // decode from base58check format
+    decodeResult = Bitcoin.Base58Check.decode(data);
+
+    // validate version
+    if(decodeResult.version != 0x80) {
+      throw "Unsupported private key version";
+    }
+
+    // convert the byte array to a BigInteger
+    priv = BigInteger.fromByteArrayUnsigned(decodeResult.payloadBytes);
+
+    // set priv value
+    this.priv = priv;
+  }
+
+
 
   /**
    * Gets the public key as DER encoded byte array
