@@ -146,8 +146,13 @@ window.FistWallet = window.FistWallet || {};
     } 
 
     // creates an address from a key
-    else if(data && data instanceof FistWallet.ECKey) {
+    else if (data && data instanceof FistWallet.ECKey) {
       createFromECKey.call(this, data);
+    }
+
+    // creates an address from WIF
+    else if (data && typeof(data) === "string" && data.length === 51 && data[0] === '5') {
+      createFromWIF.call(this, data);
     }
   }
 
@@ -198,6 +203,11 @@ window.FistWallet = window.FistWallet || {};
     var publicKeyHashBytes = eckey.getPublicKeyHashBytes();
     this.publicKeyHashBytes = publicKeyHashBytes;
     this.version = 0x00;
+  }
+
+  var createFromWIF = function(wif) {
+    var eckey = new FistWallet.ECKey(wif);
+    createFromECKey.call(this, eckey);
   }
 
 
