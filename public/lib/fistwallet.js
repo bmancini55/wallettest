@@ -543,8 +543,6 @@ window.FistWallet = window.FistWallet || {};
     // set the hash bytes for this address
     this.pubKeyHashBytes = eckey.getPublicKeyHashBytes()
 
-    // set the version from the address format
-    this.version = pubKeyVersion;
   }
 
 
@@ -596,42 +594,47 @@ window.FistWallet = window.FistWallet || {};
   var Address = FistWallet.Address
     , AddressFormat = FistWallet.AddressFormat
 
-  // local variables
-    , defaultOptions
 
 
-  // configure default options
-  defaultOptions = {
-    version: 1,       // crypto version of this wallet
-    uuid: null,       // identifier for this wallet
-    salt: null,        // used for generating the package
-    sharedKey: null   // used for server verification that encrypted wallet data belongs to user
+  /**
+   * A wallet for storing blockchain addresses and transactions
+   */
+  function Wallet(data) {
+  
+    // create a new wallet
+    if(!data) {
+      createNew.call(this);
+    } 
+    
+    // applies the supplied properties to the wallet
+    else {    
+
+      // apply supplied options
+      for(var datum in data) {
+        if(data.hasOwnProperty(datum)) {
+          this[datum] = data[datum];
+        }
+      }
+
+    }
+  
   };
 
 
   /**
-   * Represents a wallet
+   * List of addresses in this wallet
    */
-  function Wallet(options) {
+  Wallet.prototype.addresses = [];
 
-    // apply default options
-    for(var option in defaultOptions) {
-      if(defaultOptions.hasOwnProperty(option)) {
-        this[option] = defaultOptions[option];
-      }
-    }
+  /**
+   * Identifier for this wallet
+   */
+  Wallet.prototype.uuid = null;
 
-    // apply supplied options
-    for(var option in options) {
-      if(options.hasOwnProperty(option) && defaultOptions.hasOwnProperty(option)) {
-        this[option] = options[option];
-      }
-    }
-
-    this.addressHash = {}
-    this.addressChain = []
-    this.currentAddressIndex = 0;
-  };
+  /**
+   * Used for service verification that encrypted data belongs to the user
+   */
+  Wallet.prototype.sharedKey = null;
 
 
   /**
@@ -651,27 +654,25 @@ window.FistWallet = window.FistWallet || {};
 
     // generate the new address
     address = new Address({ format: format });
-    addressBase58Check = address.encode();
 
-    // push into address lookup if not already in wallet
-    if(!me.addressHash.hasOwnProperty(addressBase58Check)) {
-      me.addressHash[addressBase58Check] = address;
-      me.addressChain.push(address);
-    }
+    // add new address to wallet
+    me.addresses.push(address);
 
     return address;
   };
 
 
 
+  // PRIVATE
+  //
+
   /**
    * Creates a new wallet
    */
-  Wallet.create = function() {
+  var createNew = function() {
 
     var uuid = Wallet.generateUUID()
-      , sharedKey = Wallet.generateSharedKey()
-      , salt = Wallet.generateSalt();
+      , sharedKey = Wallet.generateSharedKey();
 
     if(uuid.length != 36)
       throw 'UUID was not generated correctly';
@@ -679,17 +680,9 @@ window.FistWallet = window.FistWallet || {};
     if(sharedKey.length != 64)
       throw 'Shared Key was not generated correctly';
 
-    return new Wallet({
-      uuid: uuid,          
-      sharedKey: sharedKey,
-      salt: salt
-    });
-
+    this.uuid = uuid;
+    this.sharedKey = sharedKey;
   }
-
-
-  // PRIVATE
-  //
 
   /**
    * Generates a UUID for identifying the wallet
@@ -754,18 +747,6 @@ window.FistWallet = window.FistWallet || {};
 
   }
 
-  /**
-   * Generates a 64-bit salt
-   */
-  Wallet.generateSalt = function() {
-
-    var srng = new SecureRandom()
-      , bytes = new Array(8);
-
-    srng.nextBytes(bytes);
-    return bytes;
-  }
-
 
   // EXPORT
   //
@@ -783,28 +764,98 @@ window.FistWallet = window.FistWallet || {};
   // module dependencies
   var Base58Check = Bitcoin.Base58Check
     , Wallet = FistWallet.Wallet
+    , Address = FistWallet.Address
+    , AddressFormats = FistWallet.AddressFormats
   
   // local variables
     , Packer
     , PackerV1;
 
 
-  // NOTE this would be better as a direct
-  //      serialization of the wallet object
-  //      in order to prevent new properties from
+  // NOTE this may be better as a direct
+  //      serialization to prevent new properties
+  //      from getting missed
+  function getAddressJson(address) {
+    return {
+      name: address.name,
+      format: address.format.name,
+      pub: address.encodePubKeyHash(),
+      priv: address.encodePrivKey()
+    }
+  }
+
+  // NOTE this may be better as a direct
+  //      serialization to prevent new properties 
+  //      from getting missed
   function getWalletJson(wallet) {
-    return JSON.stringify({
+
+    var addresses = wallet.addresses 
+      , addressJson = [];      
+
+    // create json for each address
+    addresses.forEach(function(address) {
+      addressJson.push(getAddressJson(address));
+    });
+
+    return {
       version: wallet.version,
       uuid: wallet.uuid,
       sharedKey: wallet.sharedKey,
-      salt: wallet.salt
+      salt: wallet.salt,
+      addresses: addresses
+    };
+  }  
 
-      // TODO add address stuff here
-    });
-  }    
+
+  // NOTE this may be better implemented on the Address class
+  //
+  function getAddressFromJson(json) {
+    var format
+      , address;
     
+    format = AddressFormats[json.format];
+    address = new Address(format, json.priv);
+    address.name = json.name;
+
+    return address;
+  }
+
+  // NOTE this may be better implemented on the Wallet class
+  //
+  function getWalletFromJson(json) {
+    var wallet
+      , addresses;
+
+    wallet  = new Wallet();
+    wallet.uuid = json.uuid;
+    wallet.sharedKey = json.sharedKey;
+
+    // create address instance for each address json
+    json.addresses.forEach(function(addressJson) {
+
+      var address = getAddressFromJson(addressJson);
+      wallet.addresses.push(address);
+
+    });
+
+    return wallet;
+  }
+
+
+  // Generates a 64-bit salt for use by packers
+  //
+  function generateSalt() {
+
+    var srng = new SecureRandom()
+      , bytes = new Array(8);
+
+    srng.nextBytes(bytes);
+    return bytes;
+  }
+
 
  
+
   Packer = function() { }
 
   Packer.prototype.pack = function() {
@@ -821,6 +872,7 @@ window.FistWallet = window.FistWallet || {};
 
   PackerV1 = function() {
 
+    this.version = 1;
     this.scryptIterations = 2048;   // N - general work to perform
     this.scryptMemory = 8;          // r - block size scales memory usage
     this.scryptCPU = 1;             // p - parallelization scales cpu usage
@@ -830,18 +882,25 @@ window.FistWallet = window.FistWallet || {};
 
   PackerV1.prototype.pack = function(wallet, passphrase, callback) {
     
-    var scryptIterations = this.scryptIterations
+    var version = 1
+      , scryptIterations = this.scryptIterations
       , scryptMemory = this.scryptMemory
       , scryptCPU = this.scryptCPU
       , scryptKeyLength = this.scryptKeyLength
+      , uuid = wallet.uuid
       , payload
       , cipher
+      , salt      
+
+
+    // generate salt
+    salt = generateSalt();
     
     // generate JSON
-    payload = getWalletJson(wallet);
+    payload = JSON.stringify(getWalletJson(wallet));
 
     // derive password using scrypt
-    Crypto.scrypt(passphrase, wallet.salt, scryptIterations, scryptMemory, scryptCPU, scryptKeyLength, function(derivedBytes) {
+    Crypto.scrypt(passphrase, salt, scryptIterations, scryptMemory, scryptCPU, scryptKeyLength, function(derivedBytes) {
 
       var cipher
         , encoded;
@@ -850,13 +909,13 @@ window.FistWallet = window.FistWallet || {};
       cipher = Crypto.AES.encrypt(payload, derivedBytes, { mode: new Crypto.mode.CBC(Crypto.pad.iso10126), asBytes: true});    
 
       // create base58Check
-      encoded = Base58Check.encode(wallet.version, cipher);
+      encoded = Base58Check.encode(version, cipher);
     
       // generate package
       callback({ 
-        version: wallet.version,
-        uuid: wallet.uuid,
-        salt: Crypto.util.bytesToHex(wallet.salt),
+        version: version,
+        uuid: uuid,
+        salt: Crypto.util.bytesToHex(salt),
         payload: encoded,
       })
     
@@ -866,7 +925,8 @@ window.FistWallet = window.FistWallet || {};
 
   PackerV1.prototype.unpack = function(package, passphrase, callback) {
       
-    var scryptIterations = this.scryptIterations
+    var version = this.version
+      , scryptIterations = this.scryptIterations
       , scryptMemory = this.scryptMemory
       , scryptCPU = this.scryptCPU
       , scryptKeyLength = this.scryptKeyLength
@@ -893,7 +953,8 @@ window.FistWallet = window.FistWallet || {};
       }
 
       // construct wallet
-      callback(new Wallet(json))
+      wallet = getWalletFromJson(json);
+      callback(wallet);
 
     });
 
