@@ -32,7 +32,7 @@
 	* p = parallelization cost
 	* 
 	*/
-	window.Crypto_scrypt = function (passwd, salt, N, r, p, dkLen, callback) {
+	window.Crypto.scrypt = function (passwd, salt, N, r, p, dkLen, callback) {
 		if (N == 0 || (N & (N - 1)) != 0) throw Error("N must be > 0 and a power of 2");
 
 		if (N > MAX_VALUE / 128 / r) throw Error("Parameter N is too large");
