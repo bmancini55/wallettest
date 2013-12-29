@@ -62,70 +62,6 @@ window.FistWallet = window.FistWallet || {};
 
 
 
-(function() {
-  'use strict';
-
-
-  function Wallet() { 
-    this.addressHash = {}
-    this.addressChain = []
-    this.currentAddressIndex = 0;
-  };
-
-
-  /**
-   * Generates a new address
-   * */
-  Wallet.prototype.createAddress = function() {
-    var me = this
-      , key 
-      , address
-      , addressString;
-
-    // generate the new address
-    key = new Bitcoin.ECKey();
-    address = key.getBitcoinAddress();
-    addressString = address.toString();
-
-    // push into address lookup if not already in wallet
-    if(!me.addressHash.hasOwnProperty(addressString)) {
-      me.addressHash[addressString] = address;
-      me.addressChain.push(address);
-    }
-
-    return address;
-  };
-
-
-  /**
-   * Encrypts the wallet using BIP38
-   */
-  Wallet.prototype.encrypt = function(eckey, passphrase, success, error) {
-    
-  }
-
-
-  Wallet.prototype.decrypt = function(base58bip38, passphrase, success, error) {
-    
-    // unencode base58 to bytes
-
-    // verify length is 43 bytes
-    
-    // verify start byte is 01
-    
-    // verify checksum
-
-    // get EC-multi bit 
-        
-  }
-
-
-  // EXPORT
-  //
-  window.FistWallet.Wallet = Wallet;
-
-
-}());
 
 (function() {
   
@@ -138,6 +74,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 5Hwgr3u458GLafKBgxtssHSPqJnYoGrSzgQsPwLFhLNYskDPyyA
     BitcoinPubKeyHash: { 
       name: 'BitcoinPubKeyHash',
+      currency: 'Bitcoin',
+      network: 'Main',
 
       pubKeyVersion: 0x00,  // 0
       pubKeyLeadingSymbol: { '1': true },
@@ -153,6 +91,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 5Hwgr3u458GLafKBgxtssHSPqJnYoGrSzgQsPwLFhLNYskDPyyA
     BitcoinScriptHash: { 
       name: 'BitcoinScriptHash',
+      currency: 'Bitcoin',
+      network: 'Main',
 
       pubKeyVersion: 0x05,  // 5
       pubKeyLeadingSymbol: { '3': true },
@@ -170,6 +110,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 92Pg46rUhgTT7romnV7iGW6W1gbGdeezqdbJCzShkCsYNzyyNcc
     BitcoinTestNetPubKeyHash: {
       name: 'BitcoinTestNetPubKeyHash',
+      currency: 'Bitcoin',
+      network: 'Test',
       
       pubKeyVersion: 0x6F,  // 111
       pubKeyLeadingSymbol: { 'm': true, 'n': true },
@@ -185,6 +127,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 92Pg46rUhgTT7romnV7iGW6W1gbGdeezqdbJCzShkCsYNzyyNcc
     BitcoinTestNetScriptHash: {
       name: 'BitcoinTestNetScriptHash',
+      currency: 'Bitcoin',
+      network: 'Test',
       
       pubKeyVersion: 0xC4,  // 196
       pubKeyLeadingSymbol: { '2': true },
@@ -200,6 +144,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 
     LitecoinPubKeyHash: {
       name: 'LitecoinPubKeyHash',
+      currency: 'Litecoin',
+      network: 'Main',
 
       pubKeyVersion: 0x30,  // 48
       pubKeyLeadingSymbol: { 'L': true },
@@ -208,7 +154,6 @@ window.FistWallet = window.FistWallet || {};
       privKeyVersion: 0xb0, // 176
       privKeyLeadingSymbol: { '6': true },
       privKeyLength: { start: 51, end: 51 }
-
     },
 
     // Namecoin public key hash
@@ -216,6 +161,8 @@ window.FistWallet = window.FistWallet || {};
     // PrivKey: 
     NamecoinPubKeyHash: {
       name: 'NamecoinPubKeyHash',
+      currency: 'Namecoin',
+      network: 'Main',
 
       pubKeyVersion: 0x34,  // 52
       pubKeyLeadingSymbol: { 'M': true, 'N': true },
@@ -224,7 +171,6 @@ window.FistWallet = window.FistWallet || {};
       privKeyVersion: 0xb4, //180
       privKeyLeadingSymbol: { '6': true },
       privKeyLength: { start: 51, end: 51 }
-
     },
 
 
@@ -412,11 +358,10 @@ window.FistWallet = window.FistWallet || {};
    */  
   var Address = function(options, data) {
 
-    // merge default options
-    this.options = options || {};
+    // merge opertions
     for(var option in defaultOptions) {
-      if(defaultOptions.hasOwnProperty(option) && !this.options.hasOwnProperty(option)) {
-        this.options[option] = defaultOptions[option];
+      if(defaultOptions.hasOwnProperty(option) && !this[option]) {
+        this[option] = defaultOptions[option];
       }
     }      
 
@@ -431,7 +376,7 @@ window.FistWallet = window.FistWallet || {};
     }
 
     // creates an address from WIF
-    else if (data && AddressFormats.isValidFormat(data, this.options.format)) {
+    else if (data && AddressFormats.isValidFormat(data, this.format)) {
       createFromWIF.call(this, data);
     }
 
@@ -474,7 +419,7 @@ window.FistWallet = window.FistWallet || {};
     var result =  Bitcoin.Base58Check.decode(encoded);
 
     // validate version matches
-    if(this.options.format.pubKeyVersion != result.version) {
+    if(this.format.pubKeyVersion != result.version) {
       throw 'Decoded version does not match format';
     }
 
@@ -512,7 +457,7 @@ window.FistWallet = window.FistWallet || {};
   var createFromECKey = function(eckey) {
 
     var publicKeyHashBytes
-      , format = this.options.format
+      , format = this.format
       , pubKeyVersion = format.pubKeyVersion
       
     // set the hash bytes for this address
@@ -531,7 +476,7 @@ window.FistWallet = window.FistWallet || {};
 
     var decodeResult
       , eckey
-      , format = this.options.format
+      , format = this.format
       , privKeyVersion = format.privKeyVersion;
   
     // decode from base58check
@@ -559,3 +504,68 @@ window.FistWallet = window.FistWallet || {};
   window.FistWallet.Address = Address;
 
 })();
+
+
+
+
+
+(function() {
+  'use strict';
+
+  // module dependencies
+  var Address = FistWallet.Address
+    , AddressFormat = FistWallet.AddressFormat;
+
+
+
+  /**
+   * Represents a wallet
+   */
+  function Wallet() {    
+    this.addressHash = {}
+    this.addressChain = []
+    this.currentAddressIndex = 0;
+  };
+
+
+  /**
+   * Generates a new address
+   * @param {AddressFormat} format of the address to create
+   * @returns {Address}
+   */
+  Wallet.prototype.createAddress = function(format) {
+    var me = this
+      , address
+      , addressBase58Check;
+
+    // generate the new address
+    address = new Address({ format: format });
+    addressBase58Check = address.encode();
+
+    // push into address lookup if not already in wallet
+    if(!me.addressHash.hasOwnProperty(addressBase58Check)) {
+      me.addressHash[addressBase58Check] = address;
+      me.addressChain.push(address);
+    }
+
+    return address;
+  };
+
+
+  Wallet.prototype.encrypt = function(eckey, passphrase, success, error) {
+    
+  }
+
+
+  Wallet.prototype.decrypt = function(base58bip38, passphrase, success, error) {
+           
+  }
+
+
+  // EXPORT
+  //
+  window.FistWallet.Wallet = Wallet;
+
+
+}());
+
