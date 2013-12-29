@@ -247,6 +247,15 @@ window.FistWallet = window.FistWallet || {};
 
 
   /**
+   * Gets the private key as bytes
+   */
+  ECKey.prototype.getPrivateKeyBytes = function() {
+
+    return this.priv.toByteArrayUnsigned();
+  }
+
+
+  /**
    * Private key represented by a BigNumber 
    */
   ECKey.prototype.priv = null;
@@ -316,7 +325,7 @@ window.FistWallet = window.FistWallet || {};
 
 
 
-
+// ADDRESS MODULE
 // module depends on FistWallet.ECKey, FistWallet.AddressFormats
 
 (function() {
@@ -394,13 +403,23 @@ window.FistWallet = window.FistWallet || {};
   Address.prototype.name = '';
 
   /**
-   * Gets the Elliptic Curve key used to generate the address
+   * A hashed byte array for the elliptic curve public key
+   * that this address represents
+   *
+   * This is the payload of a base58check version of the
+   * address in byte form
    */
-  Address.prototype.eckey = null;
+  Address.prototype.pubKeyHashBytes = null;
+
+  /**
+   * This is the private key as taken from the Elliptic
+   * Curve key in byte form
+   */
+  Address.prototype.privKeyBytes = null;
 
   
   /**
-   * Encodes the Address in the standard format (Base58Check):
+   * Encodes the public key hash in the standard format (Base58Check):
    * 
    * Version = 1 byte of 0 (zero); on the test network, this is 1 byte of 111
    * Key hash = Version concatenated with RIPEMD-160(SHA-256(public key))
@@ -409,12 +428,18 @@ window.FistWallet = window.FistWallet || {};
    *
    * https://en.bitcoin.it/wiki/Protocol_specification#Addresses
    */
-  Address.prototype.encode = function() {
-    return Base58Check.encode(this.version, this.publicKeyHashBytes);
+  Address.prototype.encodePubKeyHash = function() {
+
+    var format = this.format
+      , version = this.format.pubKeyVersion
+      , bytes = this.pubKeyHashBytes
+
+    return Base58Check.encode(version, bytes);
   }
 
   /**
-   * Decodes from the standard format (Base58Check):
+   * Decodes the Address public key hash from standard format (Base58Check)
+   * and mutates the pubKeyHashBytes property
    *
    * Version = 1 byte of 0 (zero); on the test network, this is 1 byte of 111
    * Key hash = Version concatenated with RIPEMD-160(SHA-256(public key))
@@ -423,17 +448,61 @@ window.FistWallet = window.FistWallet || {};
    *
    * https://en.bitcoin.it/wiki/Protocol_specification#Addresses
    */
-  Address.prototype.decode = function(encoded) {
-    var result =  Base58Check.decode(encoded);
+  Address.prototype.decodePubKeyHash = function(encoded) {
+
+    var format = this.format
+      , version = format.pubKeyVersion
+      , result;
+      
+    // decode the pub key hash
+    result = Base58Check.decode(encoded);
 
     // validate version matches
-    if(this.format.pubKeyVersion != result.version) {
+    if(version != result.version) {
       throw 'Decoded version does not match format';
     }
 
     // set the values
-    this.version = result.version;
-    this.publicKeyHashBytes = result.payloadBytes;
+    this.pubKeyHashBytes = result.payloadBytes;
+
+    // return the bytes
+    return this.pubKeyHashBytes;
+  }
+
+  /**
+   * Creates an export via WIF
+   */
+  Address.prototype.encodePrivKey = function() {
+    
+    var format = this.format
+      , version = format.privKeyVersion
+      , bytes = this.privKeyBytes;
+
+    return  Base58Check.encode(version, bytes);
+
+  }
+
+  /**
+   * Decodes an export via WIF and mutates the privKeyHashBytes property
+   */
+  Address.prototype.decodePrivKey = function(encoded) {
+    
+    var format = this.format
+      , version = format.privKeyVersion
+      , result;
+
+    // decode the priv key wia base58check
+    result = Base58Check.decode(encoded);
+
+    // verify the verion matches
+    if(version != result.version) {
+      throw 'Decoded version does not match format';
+    }
+
+    // set the private key
+    this.privKeyBytes = result.payloadBytes;
+
+    return this.privKeyBytes;
   }
 
 
@@ -464,15 +533,15 @@ window.FistWallet = window.FistWallet || {};
    */
   var createFromECKey = function(eckey) {
 
-    var publicKeyHashBytes
+    var pubKeyHashBytes
       , format = this.format
       , pubKeyVersion = format.pubKeyVersion;
     
-    // cache the key
-    this.eckey = eckey;
+    // cache the private key
+    this.privKeyBytes = eckey.getPrivateKeyBytes();
       
     // set the hash bytes for this address
-    this.publicKeyHashBytes = eckey.getPublicKeyHashBytes()
+    this.pubKeyHashBytes = eckey.getPublicKeyHashBytes()
 
     // set the version from the address format
     this.version = pubKeyVersion;
