@@ -1,21 +1,9 @@
 // module requirements
 var express = require('express')
   , CONFIG = require('./config.js').development
-  , hbs = require('express-hbs')
 
 // local variables
   , app = express();
-
-// configure view engine
-app.set('view engine', 'hbs');
-
-// configure hbs
-app.engine('hbs', hbs.express3({
-  defaultLayout: __dirname + '/views/layout.hbs'
-}));
-
-// configure view directory
-app.set('views', __dirname + '/views');
 
 // configure static file directory
 app.use('/public', express.static(__dirname + '/public'));
@@ -23,7 +11,7 @@ app.use('/public', express.static(__dirname + '/public'));
 
 // CONFIGURE REQUESTS
 app.get('/', function(req, res) {
-  res.render('index.hbs');
+  res.sendfile(__dirname + '/public/index.html');
 });
 
 

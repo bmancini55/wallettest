@@ -198,7 +198,7 @@ window.FistWallet = window.FistWallet || {};
 
 
 
-
+// ECKEY MODULE
 // modules depends on Bitcoin.ECDSA, crypto.ripe160, crypto.sha256, jbn.ec, jbn.prng, jbn.rng
 
 (function() {
@@ -322,6 +322,7 @@ window.FistWallet = window.FistWallet || {};
   window.FistWallet.ECKey = ECKey;
 
 })();
+
 
 
 
@@ -585,7 +586,11 @@ window.FistWallet = window.FistWallet || {};
 
 
 
-// WALLET MODULES
+
+
+
+// WALLET MODULE
+// Module dependencies on FistWallet.Address, FistWAllet.AddressFormat
 
 (function() {
   'use strict';
