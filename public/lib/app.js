@@ -1,68 +1,71 @@
-
-var FistWallet = FistWallet || {};
-
-
 (function() {
   'use strict';
 
-  var fistWalletApp
+var app = FistWallet.app = { }
+  , templates = FistWallet.templates  
 
-  fistWalletApp = window.fistWalletApp = { }
-
-
-  fistWalletApp.initialize = function() {
+  // Initializes the application
+  app.initialize = function() {
    
     // render the main view
-    this.mainView = new fistWalletApp.mainView();
+    this.mainView = new app.mainView();
     this.mainView.render();
 
     // start navigation
-    Backbone.History.start({pushstate: true });
+    this.router = new app.Router();
+    Backbone.history.start({pushState: true });
   }
 
-  // home controller
-  fistWalletApp.homeController = {
+
+  /**
+   * Logic for home page
+   */
+  app.homeController = {    
     index: function() {
       
-      var view = new fistWalletApp.homeView();
-      fistWalletApp.mainView.setView(view);
+      var view = new app.homeView();
+      app.mainView.setView(view);
+      view.render();
 
-      fistWalletApp.router.navigate('/');
+      app.router.navigate('/');
     } 
   }
 
-  // the router for the application
-  fistWalletApp.router = Backbone.Router.extend({
-    routers: {
-      '/': fistWalletApp.homeController.index
+
+
+  /**
+   * Provides URL routing mechanism
+   */
+  app.Router = Backbone.Router.extend({
+    routes: {
+      '': function() { app.homeController.index() }
     }
   });
 
-}());
 
 
-
-
-(function() {
-  'use strict';
 
   /**
-   * The main application view
+   * Main application view responsible for
+   * displaying subviews and managing menus
    */
-  fistWalletApp.mainView = Backbone.View.extend({
+  app.mainView = Backbone.View.extend({
 
-    renderTo: 'body',
+    el: 'body',
 
-    tagName: 'div',
+    className: 'main-view',
+
+    template: templates.main,
 
     render: function() {
+      console.log('rendering main view');
 
-      var template = Handlebars.compile($("#tpl-mainview").text());
-      this.$el.html(template({}));
+      var html = this.template({});
+      this.$el.html(html);
       return this;
     },
 
-    setMainView: function(view) {
+    setView: function(view) {
 
       // remove the old view
       if(this.currentView) {
@@ -75,8 +78,7 @@ var FistWallet = FistWallet || {};
       // attach render to as the main body for the new view
       // defer rendering to the caller
       if(this.currentView) {
-        this.$el.find(".main-view").html('<div class="main-view-conent"></div>');
-        this.currentView.renderTo = ".main-view-content";
+        this.$el.find(".current-view").html(this.currentView.$el);        
       }
 
     },
@@ -89,22 +91,23 @@ var FistWallet = FistWallet || {};
   /**
    * Home index view
    */
-  fistWalletApp.homeView = Backbone.View.extend({
+  app.homeView = Backbone.View.extend({    
 
     className: 'home-view',
 
+    template: templates.homeindex,
+
     render: function() {
+      console.log('rendering home index');
 
-      var template = Handlebars.compile($("#tpl-homeindex"));
-      this.$el.html(template({}));
+      var html = this.template({});
+      this.$el.html(html);
       return this;
-
     },
 
     remove: function() {
       this.stopListening();
-
-    }
+    }    
   });
 
 }());

@@ -13,5 +13,9 @@
     "bitcoin": "~2.0.0",
     "node-litecoin": "~1.0.1",
     "mongoose": "~3.8.3"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-handlebars": "~0.6.0"
   }
 }

@@ -40,9 +40,16 @@
     <script type="text/javascript" src="/public/lib/crypto-scrypt.js"></script>
     <script type="text/javascript" src="/public/lib/fistwallet.js"></script>
 
+    <script type="text/javascript" src="/public/templates/compiled.js"></script>
     <script type="text/javascript" src="/public/lib/app.js"></script>
 
     <link rel="Stylesheet" type="text/css" href="/public/css/site.css" />
+
+    <script type="text/javascript">
+      $(function() {
+        FistWallet.app.initialize();
+      });
+    </script>
 </head>
 <body>
     
