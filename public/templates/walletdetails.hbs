@@ -1,0 +1,16 @@
+
+<h2>Your Fist Wallet</h2>
+
+<div class="currency-list"></div>
+
+<div>
+{{#each wallet.addresses}}
+
+<p>
+  {{format.name}} 
+  {{callfunc . 'encodePubKeyHash'}}
+  {{callfunc . 'encodePrivKey'}}
+</p>
+
+{{/each}}
+</div>

@@ -13,6 +13,30 @@ a {
   color: #5D482C;
 }
 
+input,
+textarea {
+  font-size: 20px;
+  font-family: tahoma;
+}
+
+input[type=button],
+input[type=submit],
+button,
+.button {
+  background-color: #90816d;
+  border: 1px solid #706658;
+  padding: .375rem 1.5rem;
+  color: #C7C4BF;  
+}
+
+input[type=textarea],
+input[type=password] {
+  background-color: #C7C5C1;
+  border: 1px solid #706658;
+  padding: .375rem 1.5rem;
+  color: #C7C4BF;
+}
+
 .inner {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -26,6 +50,7 @@ a {
   padding-bottom: 1.5rem;
   background-color: #C7C4BF;
   color: #5D482C;
+  border-bottom: 1px solid #706658;
 }
 
 .header .inner {
@@ -46,6 +71,8 @@ a {
 
 .body {
   background-color: #8F8C88;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid #706658;
 }
 .body .inner {
 } 
@@ -58,11 +85,14 @@ a {
 .footer .inner {
   text-align: center;
 }
+.footer a {
+  color: #baa28b;
+}
 
 @media only screen and (min-width: 533px) {
 
-  .header .inner {
-    max-width: 1224px;
+  .inner {
+    max-width: 600px;
   }
 
   .header .logo {

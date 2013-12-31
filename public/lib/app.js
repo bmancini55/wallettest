@@ -2,7 +2,14 @@
   'use strict';
 
 var app = FistWallet.app = { }
-  , templates = FistWallet.templates  
+  , templates = FistWallet.templates 
+
+  // currency collection
+  app.currencies = new Backbone.Collection([
+    { _id: 'bitcoin', name: 'Bitcoin', mainnet: { formats: ['BitcoinPubKeyHash', 'BitcoinScriptHash']}, testnet: { formats:['BitcoinTestNetPubKeyHash', 'BitcoinTestNameScriptHash'] }},
+    { _id: 'litecoin', name: 'Litecoin', mainnet: { formats: ['LitecoinPubKeyHash']}, testnet: { formats: [] }},
+    { _id: 'nameconi', name: 'Namecoin', mainnet: { formats: ['NamecoinPubKeyKey']}, testnet: { formats: [] }}
+  ]);
 
   // Initializes the application
   app.initialize = function() {
@@ -18,17 +25,44 @@ var app = FistWallet.app = { }
 
 
   /**
-   * Logic for home page
+   * Controller for home page
    */
   app.homeController = {    
+
+    /** 
+     * Display the home page
+     */
     index: function() {
       
       var view = new app.homeView();
-      app.mainView.setView(view);
-      view.render();
-
+      app.mainView.setView(view, { render: true});
       app.router.navigate('/');
     } 
+  }
+
+
+  /**
+   * Controller for managing your wallet
+   */
+  app.walletController = {
+
+    /**
+     * Shows the current wallet details
+     */
+    details: function() {
+
+      // verify that we have a current wallet
+      if(!app.walletModel) {
+        app.homeController.index();
+        return;
+      }
+      
+      // render the current view model
+      var view = new app.walletDetailsView({ model: app.walletModel });
+      app.mainView.setView(view, { render: true});
+      //app.router.navigate('wallet');
+    }
+
   }
 
 
@@ -42,6 +76,34 @@ var app = FistWallet.app = { }
     }
   });
 
+
+
+
+  /**
+   * Wallet view model
+   * This is an interfaces between
+   * the FistWallet.Wallet and Backbone
+   */
+  app.WalletModel = Backbone.Model.extend({        
+
+    addAddress: function(format) {
+      
+    },
+
+    removeAddress: function(address) {
+
+    }
+    
+  });
+
+  app.AddressModel = Backbone.Model.extend({
+    
+  });
+
+  app.AddressCollection = Backbone.Collection.extend({
+    model: app.AddressModel
+
+  });
 
 
 
@@ -65,7 +127,7 @@ var app = FistWallet.app = { }
       return this;
     },
 
-    setView: function(view) {
+    setView: function(view, options) {
 
       // remove the old view
       if(this.currentView) {
@@ -79,6 +141,11 @@ var app = FistWallet.app = { }
       // defer rendering to the caller
       if(this.currentView) {
         this.$el.find(".current-view").html(this.currentView.$el);        
+      }
+
+      // optionally render immediately
+      if(options && options.render) {
+        this.currentView.render();
       }
 
     },
@@ -97,6 +164,10 @@ var app = FistWallet.app = { }
 
     template: templates.homeindex,
 
+    events: {
+      'click .create-wallet': 'createWallet'
+    },
+
     render: function() {
       console.log('rendering home index');
 
@@ -107,7 +178,67 @@ var app = FistWallet.app = { }
 
     remove: function() {
       this.stopListening();
-    }    
+    },
+
+    createWallet: function() {
+
+      // create wallet and addresses
+      var wallet = new FistWallet.Wallet();
+      wallet.createAddress(FistWallet.AddressFormats.BitcoinPubKeyHash);
+      wallet.createAddress(FistWallet.AddressFormats.LitecoinPubKeyHash);
+      wallet.createAddress(FistWallet.AddressFormats.NamecoinPubKeyHash);
+      app.walletModel = new app.WalletModel({ wallet: wallet });
+
+      // load wallet details
+      app.walletController.details();
+    },
+
+    getWallet: function() {
+      
+      // email + pin 
+    }
+  });
+
+  /**
+   * Wallet details view
+   */
+  app.walletDetailsView = Backbone.View.extend({
+    
+    className: 'wallet-details-view',
+
+    template: templates.walletdetails,
+
+    initialize: function() {
+      
+    },
+
+    events: {
+      
+    },
+
+    render: function() {
+      console.log('rendering wallet details');
+
+      // render main view
+      var html = this.template(this.model.attributes);
+      this.$el.html(html);
+
+      // render currencies    
+      return this;
+    },
+
+    remove: function() {
+      this.stopListening();
+    },
+
+    createAddress: function() {
+
+    }
+
   });
 
 }());
+
+Handlebars.registerHelper('callfunc', function(obj, func) {
+  return obj[func]();
+});
