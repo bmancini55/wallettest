@@ -239,6 +239,6 @@ var app = FistWallet.app = { }
 
 }());
 
-Handlebars.registerHelper('callfunc', function(obj, func) {
-  return obj[func]();
+Handlebars.registerHelper('callfunc', function(func) {
+  return this[func]();
 });

@@ -31,10 +31,10 @@ function program1(depth0,data) {
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.format)),stack1 == null || stack1 === false ? stack1 : stack1.name)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " \n  ";
   options = {hash:{},data:data};
-  buffer += escapeExpression(((stack1 = helpers.callfunc || (depth0 && depth0.callfunc)),stack1 ? stack1.call(depth0, depth0, "encodePubKeyHash", options) : helperMissing.call(depth0, "callfunc", depth0, "encodePubKeyHash", options)))
+  buffer += escapeExpression(((stack1 = helpers.callfunc || (depth0 && depth0.callfunc)),stack1 ? stack1.call(depth0, "encodePubKeyHash", options) : helperMissing.call(depth0, "callfunc", "encodePubKeyHash", options)))
     + "\n  ";
   options = {hash:{},data:data};
-  buffer += escapeExpression(((stack1 = helpers.callfunc || (depth0 && depth0.callfunc)),stack1 ? stack1.call(depth0, depth0, "encodePrivKey", options) : helperMissing.call(depth0, "callfunc", depth0, "encodePrivKey", options)))
+  buffer += escapeExpression(((stack1 = helpers.callfunc || (depth0 && depth0.callfunc)),stack1 ? stack1.call(depth0, "encodePrivKey", options) : helperMissing.call(depth0, "callfunc", "encodePrivKey", options)))
     + "\n</p>\n\n";
   return buffer;
   }
