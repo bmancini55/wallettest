@@ -4,15 +4,18 @@
     <title>FistWallet - POW</title>
 
     <script type="text/javascript">
-    window.Bitcoin = {}
+      window.Bitcoin = {};
+      window.FistWallet = {};
     </script>
 
+    <!-- These are the external dependencies -->
     <script type="text/javascript" src="/public/vendors/jquery/jquery.min.js"></script> 
     <script type="text/javascript" src="/public/vendors/json2/json2.js"></script>
     <script type="text/javascript" src="/public/vendors/underscore/underscore.js"></script>
     <script type="text/javascript" src="/public/vendors/backbone/backbone.js"></script>
     <script type="text/javascript" src="/public/vendors/handlebars/handlebars.js"></script>
 
+    <!-- Crypto JS and BN can be moved out of bitcoinjs -->
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/crypto-js/crypto.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/crypto-js/blockmodes.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/crypto-js/ripemd160.js"></script>
@@ -27,22 +30,32 @@
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/jsbn/jsbn2.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/jsbn/prng4.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/jsbn/rng.js"></script>
+
+
+    <!-- These are functions not yet reimplmented outside of bitcoinjslib -->
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/util.js"></script>
-    <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/address.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/base58.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/ecdsa.js"></script>
-    <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/eckey.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/opcode.js"></script>
     <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/script.js"></script>
-    <script type="text/javascript" src="/public/vendors/bitcoinjs-lib/src/wallet.js"></script>
 
 
+    <!-- External crypto package -->
     <script type="text/javascript" src="/public/lib/crypto-scrypt.js"></script>
-    <script type="text/javascript" src="/public/lib/fistwallet.js"></script>
 
+    <!-- These are reimplemented versions of bitcoinjs-lib -->
+    <script type="text/javascript" src="/public/lib/base58check.js"></script>
+    <script type="text/javascript" src="/public/lib/eckey.js"></script>
+    <script type="text/javascript" src="/public/lib/addressformats.js"></script>
+    <script type="text/javascript" src="/public/lib/address.js"></script>
+    <script type="text/javascript" src="/public/lib/wallet.js"></script>
+    <script type="text/javascript" src="/public/lib/packer.js"></script>
+
+    <!-- These are the single-page web-app files -->
     <script type="text/javascript" src="/public/templates/compiled.js"></script>
-    <script type="text/javascript" src="/public/lib/app.js"></script>
+    <script type="text/javascript" src="/public/app/fistwallet.js"></script>
 
+    <!-- styling yo -->
     <link rel="Stylesheet" type="text/css" href="/public/css/site.css" />
 
     <script type="text/javascript">
