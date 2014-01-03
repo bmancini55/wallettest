@@ -2,7 +2,11 @@
   "name": "wallettest",
   "version": "0.0.0",
   "description": "wallettest",
-  "main": "app.js",
+  
+  "scripts": {
+    "start": "node ./server/app.js"
+  },
+  
   "author": {
     "name": "bmancini",
     "email": ""

@@ -1,17 +1,17 @@
 // module requirements
 var express = require('express')
-  , CONFIG = require('./config.js').development
+  , CONFIG = require('../config.js').development
 
 // local variables
   , app = express();
 
 // configure static file directory
-app.use('/public', express.static(__dirname + '/public'));
+app.use('/public', express.static(__dirname + '../public'));
 
 
 // CONFIGURE REQUESTS
 app.get('/', function(req, res) {
-  res.sendfile(__dirname + '/public/index.html');
+  res.sendfile(__dirname + '..//public/index.html');
 });
 
 
