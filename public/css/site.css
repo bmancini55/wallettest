@@ -13,6 +13,10 @@ a {
   color: #5D482C;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color: #5D482C;
+}
+
 input,
 textarea {
   font-size: 20px;
@@ -30,12 +34,12 @@ button,
   color: #C7C4BF;  
 }
 
-input[type=textarea],
+input[type=text],
 input[type=password] {
   background-color: #C7C5C1;
   border: 1px solid #706658;
-  padding: .375rem 1.5rem;
-  color: #C7C4BF;
+  padding: .375rem .375rem;
+  color: #5D482C;
 }
 
 .inner {
@@ -74,6 +78,7 @@ input[type=password] {
   background-color: #8F8C88;
   border-top: 1px solid transparent;
   border-bottom: 1px solid #706658;
+  color: #6D583C;
 }
 .body .inner {
 } 
@@ -89,6 +94,63 @@ input[type=password] {
 .footer a {
   color: #baa28b;
 }
+
+
+
+
+.home .supports {
+  display: flex;
+  align-items: center;
+  -webkit-align-items: center;
+  text-align: center;
+}
+.home .supports h2 {
+  width: 33%;
+}
+
+
+.home .info {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-end;
+
+  -webkit-flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -webkit-align-content: flex-end;
+}
+.home .info .reason {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 .75em;
+
+  -moz-box-sizing: border-box;
+}
+.home .info .reason p {
+  font-size: .9rem;
+  line-height: 1.4rem;
+}
+.home .info .reason h3 {
+  
+}
+
+.home .forms {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  -webkit-flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -webkit-align-content: flex-end;
+}
+.home .forms form {
+  width: 50%;
+  box-sizing: border-box;
+  padding-right: 1.5rem;
+
+  -moz-box-sizing: border-box;
+}
+
 
 @media only screen and (min-width: 533px) {
 

@@ -14,6 +14,10 @@
    * A wallet for storing blockchain addresses and transactions
    */
   function Wallet(data) {
+ 
+    this.addresses = [];
+    this.id = null;
+    this.sharedKey = null;  
   
     // create a new wallet
     if(!data) {
@@ -31,24 +35,8 @@
       }
 
     }
-  
-  };
+ };
 
-
-  /**
-   * List of addresses in this wallet
-   */
-  Wallet.prototype.addresses = [];
-
-  /**
-   * Identifier for this wallet
-   */
-  Wallet.prototype.uuid = null;
-
-  /**
-   * Used for service verification that encrypted data belongs to the user
-   */
-  Wallet.prototype.sharedKey = null;
 
 
   /**
@@ -85,21 +73,11 @@
    */
   var createNew = function() {
 
-    var uuid = Wallet.generateUUID()
-      , sharedKey = Wallet.generateSharedKey();
-
-    if(uuid.length != 36)
-      throw 'UUID was not generated correctly';
-
-    if(sharedKey.length != 64)
-      throw 'Shared Key was not generated correctly';
-
-    this.uuid = uuid;
-    this.sharedKey = sharedKey;
+  
   }
 
   /**
-   * Generates a UUID for identifying the wallet
+   * Generates a UUID
    */
 
   Wallet.generateUUID = function() {
@@ -141,6 +119,36 @@
     }
 
     return uuid;
+  }
+
+  /**
+   * This uses the concatination of an email address
+   * and 4-10 digit pin as the source for a hashed identifier
+   */
+  Wallet.generateID = function(email, pin, callback) {
+  
+    var emailRegex = new RegExp(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i)
+      , pinRegex = new RegExp(/^[0-9a-z]{4,64}$/i)
+      , concat
+      , hash;
+
+    // validate email
+    if(!email || !emailRegex.test(email)) {
+      callback("Email is not valid", null);
+      return;
+    }
+
+    // validate pin
+    if(!pin || !pinRegex.test(pin)) {
+      callback("Pin must be between 4 and 64 characters");
+      return;
+    }
+
+    // concatinate email, delimiter, and pin
+    concat = email + '|' + pin;
+
+    // hash that biatch and return hex
+    callback(null, Crypto.RIPEMD160(Crypto.SHA256(concat)));
   }
 
 

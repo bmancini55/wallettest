@@ -13,6 +13,9 @@ var app = FistWallet.app = { }
 
   // Initializes the application
   app.initialize = function() {
+
+    // initialize flash messages
+    Backbone.Flash.initialize();  
    
     // render the main view
     this.mainView = new app.mainView();
@@ -155,17 +158,23 @@ var app = FistWallet.app = { }
   });
 
 
+
+
+
+
+
   /**
    * Home index view
    */
   app.homeView = Backbone.View.extend({    
 
-    className: 'home-view',
+    className: 'home',
 
     template: templates.homeindex,
 
     events: {
-      'click .create-wallet': 'createWallet'
+      'submit .create-wallet': 'createWallet',
+      'submit .open-wallet': 'openWallet'
     },
 
     render: function() {
@@ -180,31 +189,79 @@ var app = FistWallet.app = { }
       this.stopListening();
     },
 
-    createWallet: function() {
+    createWallet: function(e) {
+
+      var me = this
+        , wallet
+        , viewmodel
+        , email = this.$el.find(".create-wallet input[name=email]").val()
+        , pin = this.$el.find(".create-wallet input[name=pin]").val()
+        , pass = this.$el.find(".create-wallet input[name=password]").val()
+        , sharedkey;
+
+      // cancel event if from event
+      if(e) {
+        e.preventDefault();
+      }
 
       // create wallet and addresses
-      var wallet = new FistWallet.Wallet();
+      var wallet = new FistWallet.Wallet();    
       wallet.createAddress(FistWallet.AddressFormats.BitcoinPubKeyHash);
       wallet.createAddress(FistWallet.AddressFormats.LitecoinPubKeyHash);
       wallet.createAddress(FistWallet.AddressFormats.NamecoinPubKeyHash);
-      app.walletModel = new app.WalletModel({ wallet: wallet });
 
-      // load wallet details
-      app.walletController.details();
+      // set viewmodel
+
+      FistWallet.Wallet.generateID(email, pin, function(err, id) {
+
+        var sharedKey;
+
+        if(err) {
+          Backbone.trigger('flash', { message: err, type: 'failure' }, { el: me.$el });
+
+        } else {
+
+          // generate shared key
+          sharedKey = FistWallet.Wallet.generateSharedKey();
+
+          // build model
+          app.walletModel = viewmodel = new app.WalletModel({ wallet: wallet });
+          viewmodel.set('id', id);
+          viewmodel.set('sharedkey', sharedKey);
+
+          //redirect
+          app.walletController.details();
+ 
+        }
+      });
     },
 
-    getWallet: function() {
+    openWallet: function(e) {
       
-      // email + pin 
+      var wallet 
+        , viewmodel
+        , email = this.$el.find('.open-wallet input[name=email]').val()
+        , pin = this.$el.find('.open-wallet input[name=pin]').val()
+        , pass = this.$el.find('.open-wallet intput[name=password]').val()
+        , id = FistWallet.Wallet.generateID(email, pin);
+
+      // cancel event if from event
+      if(e) {
+        e.preventDefault();
+      }
     }
+
   });
+
+
+
 
   /**
    * Wallet details view
    */
   app.walletDetailsView = Backbone.View.extend({
     
-    className: 'wallet-details-view',
+    className: 'wallet-details',
 
     template: templates.walletdetails,
 
@@ -238,6 +295,8 @@ var app = FistWallet.app = { }
   });
 
 }());
+
+
 
 Handlebars.registerHelper('callfunc', function(func) {
   return this[func]();
