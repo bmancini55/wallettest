@@ -19,7 +19,7 @@ h1, h2, h3, h4, h5, h6 {
 
 input,
 textarea {
-  font-size: 20px;
+  font-size: 32px;
   font-family: palatino, arial;
   -webkit-appearance: none;
 }
@@ -40,6 +40,7 @@ input[type=password] {
   border: 1px solid #706658;
   padding: .375rem .375rem;
   color: #5D482C;
+  width: 100%;
 }
 
 .inner {
@@ -96,7 +97,29 @@ input[type=password] {
 }
 
 
+/********************************************************
+ * COMPONENTS
+ *******************************************************/
 
+.giant-button {
+  display: block;
+  width: 100%;  
+  font-size: 2em;
+  font-weight: bold;
+  border-radius: .25em;
+  padding: .25em .5em;
+  margin: .5em 0;
+}
+
+.hidden { 
+  display: none;
+}
+
+
+
+/********************************************************
+ * PAGE STYLES
+ *******************************************************/
 
 .home .supports {
   display: flex;
@@ -133,24 +156,6 @@ input[type=password] {
 .home .info .reason h3 {
   
 }
-
-.home .forms {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-
-  -webkit-flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -webkit-align-content: flex-end;
-}
-.home .forms form {
-  width: 50%;
-  box-sizing: border-box;
-  padding-right: 1.5rem;
-
-  -moz-box-sizing: border-box;
-}
-
 
 @media only screen and (min-width: 533px) {
 

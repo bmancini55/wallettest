@@ -173,9 +173,11 @@ var app = FistWallet.app = { }
     template: templates.homeindex,
 
     events: {
+      'click .create-button': 'showCreateForm',
+      'click .open-button': 'showOpenForm',
       'submit .create-wallet': 'createWallet',
       'submit .open-wallet': 'openWallet'
-    },
+    },    
 
     render: function() {
       console.log('rendering home index');
@@ -187,6 +189,25 @@ var app = FistWallet.app = { }
 
     remove: function() {
       this.stopListening();
+    },
+
+
+    showCreateForm: function(e) {
+      var me = this
+        , createForm = this.$el.find('.create-wallet')
+        , actionButtons = this.$el.find('.action-buttons');
+
+      actionButtons.hide();
+      createForm.show('slow');
+    },
+
+    showOpenForm: function(e) {
+      var me = this
+        , openForm = this.$el.find('.open-wallet')
+        , actionButtons = this.$el.find('.action-buttons');
+
+      actionButtons.hide();
+      openForm.show('show');
     },
 
     createWallet: function(e) {

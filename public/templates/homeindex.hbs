@@ -1,20 +1,25 @@
+  
+<div class="action-buttons">
+  <button class="giant-button create-button">New Account</button>
+  <button class="giant-button open-button">Existing Account</button>
+</div>
 
 
 <div class="forms">
-  <form class="open-wallet">
+  <form class="open-wallet hidden">
     <h3>Sign In</h3>
-    <p><input type="text" name="email" /></p>
-    <p><input type="password" name="pin" /></p>
-    <p><input type="password" name="password" /></p>
+    <p><input type="text" name="email" placeholder="Email address" /></p>
+    <p><input type="password" name="pin" placeholder="Pin" /></p>
+    <p><input type="password" name="password" placeholder="Password" /></p>
     <p><input type="submit" value="Sign In" /></p>
   </form>
 
 
-  <form class="create-wallet">
+  <form class="create-wallet hidden">
     <h3>Sign Up</h3>
-    <p><input type="text" name="email" /></p>
-    <p><input type="password" name="pin" /></p>
-    <p><input type="password" name="password" /></p>
+    <p><input type="text" name="email" placeholder="Email address" /></p>
+    <p><input type="text" name="pin" placeholder="4-16 digit pin" /></p>  
+    <p><input type="text" name="password" placeholder="Password" /></p>  
     <p><input type="submit" value="Create" /></p>
   </form>
 </div>
